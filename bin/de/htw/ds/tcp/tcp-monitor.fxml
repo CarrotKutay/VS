@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE BorderPane>
+
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.*?>
+
+
+<BorderPane xmlns="http://javafx.com/fxml" styleClass="root-pane">
+	<top>
+		<HBox styleClass="control-pane">
+			<Label styleClass="service-port-label" text="service port" />
+			<TextField styleClass="service-port-field" text="8010">
+				<tooltip><Tooltip text="the local TCP port this monitor is listening on" /></tooltip>
+			</TextField>
+			<Label styleClass="redirect-host-label" text="redirect host" />
+			<TextField styleClass="redirect-host-field" HBox.hgrow="ALWAYS">
+				<tooltip><Tooltip text="the name of the TCP host this monitor is redirecting to" /></tooltip>
+			</TextField>
+			<Label styleClass="redirect-port-label" text=":" />
+			<TextField styleClass="redirect-port-field" text="21">
+				<tooltip><Tooltip text="the port of the TCP host this monitor is redirecting to" /></tooltip>
+			</TextField>
+			<Button styleClass="start-button">
+				<tooltip><Tooltip text="start TCP redirect" /></tooltip>
+			</Button>
+			<Button styleClass="stop-button">
+				<tooltip><Tooltip text="stop TCP redirect" /></tooltip>
+			</Button>
+			<Button styleClass="clear-button">
+				<tooltip><Tooltip text="clear response table" /></tooltip>
+			</Button>
+		</HBox>
+	</top>
+	<center>
+		<SplitPane styleClass="record-pane">
+			<items>
+				<TableView styleClass="record-table">
+					<columns>
+						<TableColumn styleClass="record-identity-column" text="ID" />
+						<TableColumn styleClass="record-open-timestamp-column" text="Opened" />
+						<TableColumn styleClass="record-close-timestamp-column" text="Closed" />
+						<TableColumn styleClass="record-request-length-column" text="Request" />
+						<TableColumn styleClass="record-response-length-column" text="Response" />
+					</columns>
+				</TableView>
+				<SplitPane styleClass="traffic-pane">
+					<items>
+						<TextArea styleClass="request-area" />
+						<TextArea styleClass="response-area" />
+					</items>
+				</SplitPane>
+			</items>
+		</SplitPane>
+	</center>
+	<bottom>
+		<HBox styleClass="error-pane">
+			<Label styleClass="error-label" text="error" />
+			<TextField styleClass="error-field" HBox.hgrow="ALWAYS" />
+		</HBox>
+	</bottom>
+</BorderPane>

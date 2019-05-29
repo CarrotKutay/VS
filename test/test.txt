@@ -1,0 +1,17 @@
+RETRIEVE:
+ftp.dlptest.com:21
+dlpuser@dlptest.com
+5p2tvn92R0di8FdiLCfzeeT0b
+true
+RETRIEVE
+\test.jpg
+D:\Test\NewFolder
+
+STORE:
+ftp.dlptest.com:21
+dlpuser@dlptest.com
+5p2tvn92R0di8FdiLCfzeeT0b
+true
+STORE
+D:\Test\NewFolder\test.jpg
+"\\"
