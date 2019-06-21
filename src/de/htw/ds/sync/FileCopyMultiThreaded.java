@@ -6,7 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import javafx.geometry.Pos;
 
 
 public final class FileCopyMultiThreaded {

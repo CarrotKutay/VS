@@ -60,10 +60,9 @@ public final class HttpRedirectServer {
 	 */
 	static public void main (final String[] args) throws IllegalArgumentException, IOException, UnrecoverableKeyException, KeyManagementException, NullPointerException, CertificateException {
 		final int servicePort = args.length > 0 ?Integer.parseInt(args[0]) : 8010;
-		final boolean sessionAware = args.length > 1 ? Boolean.parseBoolean(args[1]) : false;
-		final Path keyStoreFile = args.length > 2 ? Paths.get(args[2]).toAbsolutePath() : null;
-		final String keyRecoveryPassword = args.length > 3 ? args[3] : "changeit";
-		final String keyManagementPassword = args.length > 4 ? args[4] : keyRecoveryPassword;
+		final Path keyStoreFile = args.length > 1 ? Paths.get(args[1]).toAbsolutePath() : null;
+		final String keyRecoveryPassword = args.length > 2 ? args[2] : "changeit";
+		final String keyManagementPassword = args.length > 3 ? args[3] : keyRecoveryPassword;
 		if (keyStoreFile != null && !Files.isRegularFile(keyStoreFile)) throw new IllegalArgumentException();
 
 		final boolean transportLayerSecurity = keyStoreFile != null;
@@ -83,7 +82,7 @@ public final class HttpRedirectServer {
 			server = HttpServer.create(serviceAddress, 0);
 		}
 
-		final HttpRedirectHandler redirectHandler = new HttpRedirectHandler(sessionAware, redirectServerAddresses);
+		final HttpRedirectHandler redirectHandler = new HttpRedirectHandler(transportLayerSecurity ? "https" : "http", redirectServerAddresses);
 		server.createContext("/", redirectHandler);
 		server.start();
 		try {

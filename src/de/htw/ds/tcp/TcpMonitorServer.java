@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -34,7 +33,6 @@ import de.htw.tool.Uninterruptibles;
 
 @Copyright(year=2008, holders="Sascha Baumeister")
 public class TcpMonitorServer implements Runnable, AutoCloseable {
-	static private final int MAX_PACKET_SIZE = 0xffff - 20 - 20;
 	static private final byte[] HTTP_HOST_START = "Host: ".getBytes(StandardCharsets.UTF_8);
 	static private final byte[] HTTP_HOST_STOP = "\n".getBytes(StandardCharsets.UTF_8);
 	static private SocketFactory TLS_SOCKET_FACTORY = SSLSocketFactory.getDefault();
@@ -163,33 +161,17 @@ public class TcpMonitorServer implements Runnable, AutoCloseable {
 					// into both the client connection's output stream and another byte output stream.
 					// Note that the existing utility class de.htw.tool.IOStreams offers a highly
 					// elegant (and compact) solution, especially in conjunction with Java 8 Lambda-Operators.					
-					
-					final ByteArrayOutputStream bos_client = new ByteArrayOutputStream(), bos_server = new ByteArrayOutputStream();
+					final long openTimestamp = new Date().getTime();
+
+					ByteArrayOutputStream bos_client = new ByteArrayOutputStream(), bos_server = new ByteArrayOutputStream();
 					final InputStream clientIS = clientConnection.getInputStream(), serverIS = serverConnection.getInputStream();
 					final OutputStream clientOS = clientConnection.getOutputStream(), serverOS = serverConnection.getOutputStream();
 					
-					final long openTimestamp = new Date().getTime();
 					
 					try (OutputStream multiOStream2S = IOStreams.newMultiOutputStream(serverOS, bos_client)) {
-						try (OutputStream multiOStream2C = IOStreams.newMultiOutputStream(bos_server, clientOS)) {
-												
-							final Callable<?> clientWorker = () -> {
-								try {
-									copy(clientIS, multiOStream2S, 0x10000, serverName.getBytes());
-								} catch (IOException e) {
-									throw new UncheckedIOException(e);
-								}
-								return true;
-							};
-							
-							final Callable<?> serverWorker = () -> {
-								try {
-									copy(serverIS, multiOStream2C, 0x10000, serverName.getBytes());
-								} catch (IOException e) {
-									throw new UncheckedIOException(e);
-								}
-								return true;
-							};
+						try (OutputStream multiOStream2C = IOStreams.newMultiOutputStream(bos_server, clientOS)) {	
+							final Callable<Long> clientWorker = () -> copy(clientIS, multiOStream2S, 0x10000, serverName.getBytes(StandardCharsets.UTF_8));
+							final Callable<Long> serverWorker = () -> IOStreams.copy(serverIS, multiOStream2C, 0x10000);	
 							
 							final Future<?>[] futures = new Future[2];
 							futures[0] = this.parent.threadPool.submit(serverWorker);
@@ -253,50 +235,6 @@ public class TcpMonitorServer implements Runnable, AutoCloseable {
 					// therefore also the second socket stream) as well. Also note that a socket stream's
 					// read() method will throw a SocketException when interrupted while blocking, which is
 					// "normal" behavior and should be handled as if the read() Method returned -1!
-					
-//					final Runnable clientWorker = ()  -> {
-//					try (InputStream clientIS = clientConnection.getInputStream()){
-//						try (OutputStream serverOS = serverConnection.getOutputStream()){
-//							try (
-//									OutputStream bos = new OutputStream() {		
-//										@Override
-//										public void write(int b) throws IOException {
-//											this.write(new byte[] { (byte) b });
-//										}
-//									};
-//									OutputStream multiOStream2S = IOStreams.newMultiOutputStream(serverOS, bos)){
-//								
-//								byte[] buffer = new byte[0x10000];
-//								for (int bytesToRead = clientIS.read(buffer); bytesToRead != -1; bytesToRead = clientIS.read(buffer)) {
-//									multiOStream2S.write(buffer, 0, bytesToRead);
-//								}
-//							}
-//						}
-//					}
-//				};
-//				
-//				final Runnable serverWorker = () -> {
-//					try (InputStream serverIS = serverConnection.getInputStream()){
-//						try (OutputStream clientOS = clientConnection.getOutputStream()){
-//							try (
-//									OutputStream bos2 = new OutputStream() {
-//
-//										@Override
-//										public void write(int b) throws IOException {
-//											this.write(new byte[] { (byte) b });
-//										}
-//										
-//									};
-//									OutputStream multiOStream2C = IOStreams.newMultiOutputStream(clientOS, bos2)){
-//								
-//								byte[] buffer = new byte[0x10000];
-//								for (int bytesToRead = serverIS.read(buffer); bytesToRead != -1; bytesToRead = serverIS.read(buffer)) {
-//									multiOStream2C.write(buffer, 0, bytesToRead);
-//								}
-//							}
-//						}
-//					}
-//				};
 		}
 		
 		static protected long copy (final InputStream byteSource, final OutputStream byteSink, final int bufferSize, final byte[] hostname) throws NullPointerException, IOException {
