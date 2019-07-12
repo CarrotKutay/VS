@@ -38,7 +38,7 @@ import de.htw.tool.Maps;
  */
 @Copyright(year=2014, holders="Sascha Baumeister")
 public final class HttpRedirectServer {
-	static private final String PROPERTIES_FILE_NAME = "redirect-servers.properties";
+	static private final String PROPERTIES_FILE_NAME = "META-INF/tcp/redirect-servers.properties";
 	
 	/**
 	 * Prevents external instantiation.
@@ -60,6 +60,7 @@ public final class HttpRedirectServer {
 	 */
 	static public void main (final String[] args) throws IllegalArgumentException, IOException, UnrecoverableKeyException, KeyManagementException, NullPointerException, CertificateException {
 		final int servicePort = args.length > 0 ?Integer.parseInt(args[0]) : 8010;
+		//final boolean sessionAware = args.length > 1 ? Boolean.parseBoolean(args[1]) : false;
 		final Path keyStoreFile = args.length > 1 ? Paths.get(args[1]).toAbsolutePath() : null;
 		final String keyRecoveryPassword = args.length > 2 ? args[2] : "changeit";
 		final String keyManagementPassword = args.length > 3 ? args[3] : keyRecoveryPassword;
@@ -82,7 +83,7 @@ public final class HttpRedirectServer {
 			server = HttpServer.create(serviceAddress, 0);
 		}
 
-		final HttpRedirectHandler redirectHandler = new HttpRedirectHandler(transportLayerSecurity ? "https" : "http", redirectServerAddresses);
+		final HttpEdgeRedirectHandler redirectHandler = new HttpEdgeRedirectHandler(transportLayerSecurity ? "https" : "http", redirectServerAddresses);
 		server.createContext("/", redirectHandler);
 		server.start();
 		try {
@@ -166,7 +167,7 @@ public final class HttpRedirectServer {
 		final InetAddress localAddress = InetAddress.getLocalHost();
 		final Collection<InetSocketAddress> serverAddresses = new ArrayList<>();
 
-		try (InputStream byteSource = HttpRedirectServer.class.getResourceAsStream(PROPERTIES_FILE_NAME)) {
+		try (InputStream byteSource = Thread.currentThread().getContextClassLoader().getResourceAsStream(PROPERTIES_FILE_NAME)) {
 			final Map<String,String> properties = Maps.readProperties(byteSource);
 
 			for (final Map.Entry<String,String> entry : properties.entrySet()) {

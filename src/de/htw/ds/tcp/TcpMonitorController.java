@@ -5,7 +5,6 @@ import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import de.htw.tool.Exceptions;
 import de.htw.tool.LongValidator;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -30,7 +29,7 @@ public class TcpMonitorController implements AutoCloseable {
 	static private final Charset ASCII = Charset.forName("ASCII");
 	static private final Predicate<String> PORT_VALIDATOR = new LongValidator(1, 0xffff);
 
-	private volatile TcpMonitorServer monitorServer;
+	private TcpMonitorServer monitorServer;
 	private final ImageView startIcon, suspendIcon, resumeIcon, stopIcon, trashIcon;
 	private final BorderPane rootPane;
 	private final TextField servicePortField, redirectHostField, redirectPortField, errorField;
@@ -227,11 +226,10 @@ public class TcpMonitorController implements AutoCloseable {
 
 	/**
 	 * Returns a formatted error message for the given exception, or an empty string for none.
-	 * @param exception the (optional) exception
+	 * @param exception the (optional) exception, or {@code null} for none
+	 * @return the message created
 	 */
 	static private String errorMessage (final Throwable exception) {
-		if (exception == null) return "";
-		final Throwable rootCause = Exceptions.rootCause(exception);
-		return String.format("%s: %s", rootCause.getClass().getSimpleName(), rootCause.getMessage());
+		return exception == null ? "" : String.format("%s: %s", exception.getClass().getSimpleName(), exception.getMessage());
 	}
 }

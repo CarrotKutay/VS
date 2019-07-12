@@ -1,0 +1,33 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="author" content="Sascha Baumeister" />
+		<meta name="dcterms.rightsHolder" content="Sascha Baumeister" />
+		<meta name="dcterms.rights" content="all rights reserved" />
+		<meta name="dcterms.dateCopyrighted" content="2008" />
+
+		<title>AJAX Chat (XML based REST calls)</title>
+		<link rel="icon" type="image/png" href="image/chat.png"/>
+		<script type="module" src="js/chat-xml-controller.js"></script>
+
+		<template id="chat-entry-template">
+			<tr>
+				<td style="color:blue"><output></output></td>
+				<td style="color:green"><output></output></td>
+				<td><output></output></td>
+			</tr>
+		</template>
+	</head>
+
+	<body>
+		<div>
+			<input type="text" />
+			<input type="text" />
+			<button type="button">send</button>
+			<button type="button">refresh</button>
+		</div>
+		<h3>Chat content:</h3>
+		<table></table>
+	</body>
+</html>

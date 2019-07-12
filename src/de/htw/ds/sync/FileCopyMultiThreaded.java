@@ -31,6 +31,7 @@ class Sender extends PipedOutputStream implements Runnable {
 
 	public PipedOutputStream pos = new PipedOutputStream();
 	
+	@SuppressWarnings("finally")
 	@Override
 	public void run() {
 		
@@ -57,6 +58,7 @@ class Receiver extends PipedInputStream implements Runnable {
 	
 	public PipedInputStream pis = new PipedInputStream();
  
+	@SuppressWarnings("finally")
 	@Override
 	public void run() {
 		while (true) {

@@ -24,7 +24,7 @@ import de.htw.tool.Maps;
  */
 @Copyright(year=2008, holders="Sascha Baumeister")
 public final class TcpSwitchApp {
-	static private final String PROPERTIES_FILE_NAME = "redirect-servers.properties";
+	static private final String PROPERTIES_FILE_NAME = "META-INF/tcp/redirect-servers.properties";
 
 	/**
 	 * Prevent external instantiation.
@@ -88,7 +88,7 @@ public final class TcpSwitchApp {
 		final InetAddress localAddress = InetAddress.getLocalHost();
 		final Collection<InetSocketAddress> serverAddresses = new ArrayList<>();
 
-		try (InputStream byteSource = HttpRedirectServer.class.getResourceAsStream(PROPERTIES_FILE_NAME)) {
+		try (InputStream byteSource = Thread.currentThread().getContextClassLoader().getResourceAsStream(PROPERTIES_FILE_NAME)) {
 			final Map<String,String> properties = Maps.readProperties(byteSource);
 
 			for (final Map.Entry<String,String> entry : properties.entrySet()) {

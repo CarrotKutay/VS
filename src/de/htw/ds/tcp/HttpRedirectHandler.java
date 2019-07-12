@@ -54,9 +54,9 @@ public class HttpRedirectHandler implements HttpHandler {
 		// and the given client address
 		
 			//randomly decide which server to take
-		final int index = ThreadLocalRandom.current().nextInt(redirectServerAddresses.length-1);
+		final int index = ThreadLocalRandom.current().nextInt(this.redirectServerAddresses.length-1);
 		// TODO: session aware + edge mit Zeitzonen
-		return redirectServerAddresses[index];
+		return this.redirectServerAddresses[index];
 	}
 
 
@@ -69,7 +69,6 @@ public class HttpRedirectHandler implements HttpHandler {
 	@Override
 	public void handle (final HttpExchange exchange) throws IOException {
 		try {
-			@SuppressWarnings("unused")
 			final InetSocketAddress redirectServerAddress = this.selectRedirectServerAddress(exchange.getRemoteAddress().getAddress());
 
 			// TODO: create a redirect URI based on the exchange's request URI parts, and the redirect server address's

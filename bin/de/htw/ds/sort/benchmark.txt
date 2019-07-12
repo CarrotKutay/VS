@@ -1,0 +1,50 @@
+goethe - faust 1x50.txt:
+========================
+
+	SortClient 1:
+	=============
+	Sort ok, 1532362 words sorted.
+	Read time: 1050ms.
+	Sort time: 623ms.
+	Write time: 217ms.
+
+
+	SortClient 2 (CPU has 4 hyperthreading processors):
+	==============================================
+	Sort ok, 1502242 words sorted.
+	Read time: 2069ms.
+	Sort time: 796ms.
+	Write time: 361ms.
+
+	SortClient3 (CPU has 4 hyperthreading processors, SortServers on ports 8001-8004):
+	==================================================================================
+	Sort ok, 1502242 words sorted.
+	Read time: 2325ms.
+	Sort time: 840ms.
+	Write time: 500ms.
+
+
+goethe - faust 1x500.txt:
+=========================
+
+	SortClient 1 (-Xmx2048m):
+	=========================
+	Sort ok, 15022420 words sorted.
+	Read time: 23331ms.
+	Sort time: 6760ms.
+	Write time: 2868ms.
+
+	SortClient 2 (CPU has 4 hyperthreading processors, -Xmx2048m):
+	==============================================================
+	Sort ok, 15022420 words sorted.
+	Read time: 22385ms.
+	Sort time: 3192ms.
+	Write time: 3065ms.
+
+	SortClient3 (CPU has 4 hyperthreading processors, SortServers on ports 8001-8004):
+	==================================================================================
+	Sort ok, 15022420 words sorted.
+	Read time: 16139ms.
+	Sort time: 4497ms.
+	Write time: 2671ms.
+	

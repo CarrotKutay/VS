@@ -1,0 +1,53 @@
+.control-pane, .error-pane {
+	-fx-alignment:	center-right;
+	-fx-spacing:	5px;
+}
+
+.service-port-field {
+	-fx-pref-width: 60px;
+}
+
+.redirect-port-field {
+	-fx-pref-width: 60px;
+}
+
+.record-pane {
+	-fx-orientation: vertical;
+}
+
+.record-identity-column {
+	-fx-alignment:	bottom-right;
+	-fx-pref-width: 175px;
+}
+
+.record-open-timestamp-column {
+	-fx-alignment:	bottom-center;
+	-fx-pref-width: 100px;
+}
+
+.record-close-timestamp-column {
+	-fx-alignment:	bottom-center;
+	-fx-pref-width: 100px;
+}
+
+.record-request-length-column {
+	-fx-alignment:	bottom-right;
+	-fx-pref-width: 100px;
+}
+
+.record-response-length-column {
+	-fx-alignment:	bottom-right;
+	-fx-pref-width: 100px;
+}
+
+.request-area, .response-area {
+	-fx-font-family: monospace;
+}
+
+.error-label {
+	-fx-text-fill: red;
+}
+
+.invalid {
+	-fx-focus-color: orange;
+}

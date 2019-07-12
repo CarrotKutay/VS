@@ -20,8 +20,11 @@ import javafx.stage.Stage;
  */
 @Copyright(year=2012, holders="Sascha Baumeister")
 public class TcpMonitorApp extends Application {
-	static private final String PACKAGE_PATH = TcpMonitorApp.class.getPackage().getName().replace('.', '/');
-
+	static private final String ICON_PATH = "META-INF/tcp/image/tcp-monitor.png";
+	static private final String ICON_PATH_PATTERN = "META-INF/tcp/image/%s-icon.gif";
+	static private final String FXML_PATH = "META-INF/tcp/tcp-monitor.fxml";
+	static private final String CSS_PATH = "META-INF/tcp/tcp-monitor.css";
+	
 	/**
 	 * Application entry point. Note that passing no arguments starts the application in GUI mode,
 	 * while passing three starts it in command mode.
@@ -49,9 +52,9 @@ public class TcpMonitorApp extends Application {
 		}
 
 		final TcpMonitorController controller = new TcpMonitorController(rootPane, icons);
-		final Image icon = new Image(PACKAGE_PATH + "/tcp-monitor.png");
+		final Image icon = new Image(ICON_PATH);
 		final Scene sceneGraph = new Scene(rootPane, 640, 480);
-		sceneGraph.getStylesheets().add(PACKAGE_PATH + "/tcp-monitor.css");
+		sceneGraph.getStylesheets().add(CSS_PATH);
 
 		window.setOnCloseRequest(event -> controller.close());
 		window.setScene(sceneGraph);
@@ -67,7 +70,7 @@ public class TcpMonitorApp extends Application {
 	 * @throws IOException if there is an I/O related problem
 	 */
 	static private BorderPane newRootPane () throws IOException {
-		try (InputStream byteSource = Thread.currentThread().getContextClassLoader().getResourceAsStream(PACKAGE_PATH + "/tcp-monitor.fxml")) {
+		try (InputStream byteSource = Thread.currentThread().getContextClassLoader().getResourceAsStream(FXML_PATH)) {
 			return new FXMLLoader().load(byteSource);
 		}
 	}
@@ -81,7 +84,7 @@ public class TcpMonitorApp extends Application {
 	 * @throws IOException if there is an I/O related problem
 	 */
 	static private Image newIcon (final String name) throws NullPointerException, IOException {
-		try (InputStream byteSource = Thread.currentThread().getContextClassLoader().getResourceAsStream(PACKAGE_PATH + "/" + name + "-icon.gif")) {
+		try (InputStream byteSource = Thread.currentThread().getContextClassLoader().getResourceAsStream(String.format(ICON_PATH_PATTERN, name))) {
 			return new Image(byteSource);
 		}
 	}

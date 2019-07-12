@@ -8,7 +8,7 @@ package de.htw.tool;
  */
 @Copyright(year = 2010, holders = "Sascha Baumeister")
 public class Reference<T> {
-	private volatile T object = null;
+	private T object = null;
 
 
 	/**

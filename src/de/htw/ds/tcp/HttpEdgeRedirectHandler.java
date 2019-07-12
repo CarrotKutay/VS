@@ -2,8 +2,12 @@ package de.htw.ds.tcp;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import de.htw.tool.Copyright;
@@ -16,6 +20,7 @@ import de.htw.tool.Copyright;
 @Copyright(year=2014, holders="Sascha Baumeister")
 public class HttpEdgeRedirectHandler implements HttpHandler {
 	private final InetSocketAddress[] edgeServerAddresses;
+	private final String scheme;
 
 
 	/**
@@ -24,10 +29,11 @@ public class HttpEdgeRedirectHandler implements HttpHandler {
 	 * @throws NullPointerException if the given argument is {@code null}
 	 * @throws IllegalArgumentException if the given argument doesn't have 48 elements
 	 */
-	public HttpEdgeRedirectHandler (final InetSocketAddress[] edgeServerAddresses) throws NullPointerException, IllegalArgumentException {
+	public HttpEdgeRedirectHandler (final String scheme, final InetSocketAddress[] edgeServerAddresses) throws NullPointerException, IllegalArgumentException {
 		if (edgeServerAddresses.length != 48) throw new IllegalArgumentException();
 		
 		this.edgeServerAddresses = edgeServerAddresses;
+		this.scheme = scheme;
 	}
 
 
@@ -45,9 +51,12 @@ public class HttpEdgeRedirectHandler implements HttpHandler {
 	 * @param timezoneOffset a timezone offset in hours
 	 * @return the selected edge server address
 	 */
-	public InetSocketAddress selectEdgeServerAddress (final float timezoneOffset) {
+	public InetSocketAddress selectEdgeServerAddress (float timezoneOffset) {
+		while (timezoneOffset < -12f) timezoneOffset += 24;
+		while (timezoneOffset > +11.5f) timezoneOffset -= 24;
 		// TODO: return an edge server address based on the given timezone offset
-		return null;
+		final int index = Math.round(2 * (timezoneOffset + 12));
+		return this.edgeServerAddresses[index];
 	}
 
 
@@ -60,6 +69,21 @@ public class HttpEdgeRedirectHandler implements HttpHandler {
 	@Override
 	public void handle (final HttpExchange exchange) throws IOException {
 		// TODO: implement by redirecting to an edge server matching the query parameter timezoneOffset.
+		try {
+			final URI requestURI = exchange.getRequestURI();
+			final Map<String, String> queryParameters = parseQueryParameters(requestURI.getQuery());
+			final String timezoneTxt = queryParameters.get("timezoneOffset");
+			final float timezoneOffset = timezoneTxt == null ? 0 : Float.parseFloat(timezoneTxt);
+			
+			final InetSocketAddress redirectEdgeServerAddress = this.selectEdgeServerAddress(timezoneOffset);
+			final URI redirectURI = URI.create(this.scheme + "://" + redirectEdgeServerAddress.getHostName() + ":" + redirectEdgeServerAddress.getPort() + requestURI.getPath());			
+			exchange.getResponseHeaders().add("Location", redirectURI.toASCIIString());
+			exchange.sendResponseHeaders(307, 0);
+			
+			Logger.getGlobal().log(Level.INFO, "Redirected request for \"{0}\" to \"{1}\".", new URI[] { requestURI, redirectURI });
+		} finally {
+			exchange.close();
+		}
 	}
 
 
@@ -68,7 +92,6 @@ public class HttpEdgeRedirectHandler implements HttpHandler {
 	 * @param uriQuery the URI query, or {@code null}
 	 * @return the URI query parameters
 	 */
-	@SuppressWarnings("unused")
 	static private Map<String,String> parseQueryParameters (final String uriQuery) {
 		final Map<String,String> result = new HashMap<String,String>();
 		if (uriQuery == null) return result;
