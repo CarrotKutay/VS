@@ -8,6 +8,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.LinkedList;
+import java.util.NoSuchElementException;
+import java.util.Queue;
 import de.htw.tool.Copyright;
 
 
@@ -76,6 +79,15 @@ public class ProxySorter implements MergeSorter<String> {
 		// TODO: If the given element is null, write newline characters to the char sink, flush
 		// the latter, and set the state to SORT. Otherwise, write the given element to the
 		// char sink, write newline characters to the latter, and do NOT flush it.
+		
+		if (element == null) {
+			this.charSink.newLine();
+			this.charSink.flush();
+			this.state = State.SORT;
+		} else {
+			this.charSink.write(element);
+			this.charSink.newLine();
+		}
 	}
 
 
@@ -97,7 +109,15 @@ public class ProxySorter implements MergeSorter<String> {
 
 		// TODO: Read the next line from the char source. Return said line if it is
 		// neither null nor empty. Otherwise, set the state to WRITE and return null.
-		return null;
+		
+		String line = this.charSource.readLine();
+		
+		if (line == null || line.isEmpty()) {
+			line = null;
+			this.state = State.WRITE;
+		}
+		
+		return line;
 	}
 
 
@@ -129,6 +149,11 @@ public class ProxySorter implements MergeSorter<String> {
 		// queue, remove two of them, use these to create a new multi-thread sorter instance, and
 		// add the latter to the queue - make sure this follows fist in first out semantics. This
 		// way, the queue is guaranteed to contain exactly one element in the end, which shall be returned.
-		return null;
+		
+		final int numberOfAddresses = serviceAddresses.length;
+		Queue<MergeSorter<String>> queue = new LinkedList<>();
+		for (int i = 0; i < numberOfAddresses; i++) queue.add(new ProxySorter(serviceAddresses[i]));
+		while(queue.size() > 1)	queue.add(new MultiThreadSorter<>(queue.remove(), queue.remove()));
+		return queue.remove();
 	}
 }

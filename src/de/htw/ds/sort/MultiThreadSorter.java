@@ -2,7 +2,9 @@ package de.htw.ds.sort;
 
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.ExecutionException;
@@ -23,12 +25,15 @@ import de.htw.tool.Uninterruptibles;
 @Copyright(year=2010, holders="Sascha Baumeister")
 public class MultiThreadSorter<E extends Comparable<E>> implements MergeSorter<E> {
 
+	static private final int CORES = Runtime.getRuntime().availableProcessors();
+	static public final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(CORES);
+	
 	private final Comparator<E> comparator = Comparator.nullsLast(Comparator.naturalOrder());
 	private final MergeSorter<E> leftChild, rightChild;
-	private final ExecutorService threadPool;
 	private E leftReadCache, rightReadCache;
 	private boolean leftWrite;
 	private State state;
+	
 
 
 	/**
@@ -43,7 +48,6 @@ public class MultiThreadSorter<E extends Comparable<E>> implements MergeSorter<E
 		this.leftChild = Objects.requireNonNull(leftChild);
 		this.rightChild = Objects.requireNonNull(rightChild);
 		this.leftWrite = true;
-		this.threadPool = Executors.newCachedThreadPool();
 		this.state = State.WRITE;
 	}
 
@@ -105,8 +109,8 @@ public class MultiThreadSorter<E extends Comparable<E>> implements MergeSorter<E
 		
 		@SuppressWarnings("unchecked")
 		final Future<E>[] futures = new Future[2];
-		futures[0] = this.threadPool.submit(leftWorker);
-		futures[1] = this.threadPool.submit(rightWorker);
+		futures[0] = THREAD_POOL.submit(leftWorker);
+		futures[1] = THREAD_POOL.submit(rightWorker);
 		
 		try {
 			try {
@@ -174,6 +178,10 @@ public class MultiThreadSorter<E extends Comparable<E>> implements MergeSorter<E
 		// sorter instance, and add the latter to the queue - make sure this follows first in
 		// first out semantics. this way, the queue is guaranteed to contain exactly one element
 		// in the end, which shall be returned.
-		return null;
+		
+		final Queue<MergeSorter<T>> queue = new LinkedList<>();
+		for (int i=0; i < CORES; i++) queue.add(new SingleThreadSorter<>());
+		while(queue.size() > 1)	queue.add(new MultiThreadSorter<>(queue.remove(), queue.remove()));
+		return queue.remove();
 	}
 }

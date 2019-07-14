@@ -1,9 +1,14 @@
 package de.htw.ds.sort;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UncheckedIOException;
+import java.io.Writer;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -108,6 +113,15 @@ public final class SortServer implements Runnable, AutoCloseable {
 			// you reach a null element, writing each of the non-null elements to the char sink, followed by
 			// a line separator. Finally, write another line separator to the char sink, and flush the latter
 			// forcing the response data to be sent completely  before reentering the wait for another CSR request.
+			
+			MergeSorter<String> sorter = MultiThreadSorter.newInstance();
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
+				
+			} catch (Exception e) {
+				
+			}
+			
 		};
 	}
 

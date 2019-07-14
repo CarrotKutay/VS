@@ -38,8 +38,10 @@ public final class SortClient2 extends SortClient {
 		final Path sourcePath = Paths.get(args[0]);
 		final Path sinkPath = Paths.get(args[1]);
 
-		final MergeSorter<String> sorter = SingleThreadSorter.newInstance();
+		final MergeSorter<String> sorter = MultiThreadSorter.newInstance();
 		final SortClient2 client = new SortClient2(sourcePath, sinkPath, sorter);
 		client.process();
+		
+		MultiThreadSorter.THREAD_POOL.shutdownNow();
 	}
 }
