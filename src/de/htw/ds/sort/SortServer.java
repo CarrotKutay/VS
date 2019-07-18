@@ -29,7 +29,7 @@ import de.htw.tool.Copyright;
  * element		:= utf8-string - (null | "")
  * </pre>
  */
-@SuppressWarnings("unused")		// TODO: remove this line
+	// TODO: remove this line
 @Copyright(year=2010, holders="Sascha Baumeister")
 public final class SortServer implements Runnable, AutoCloseable {
 	static private final int BUFFER_SIZE = 0xF000;
@@ -95,7 +95,7 @@ public final class SortServer implements Runnable, AutoCloseable {
 	 */
 	static private Runnable newConnectionHandler (final Socket connection) throws NullPointerException {
 		if (connection == null) throw new NullPointerException();
-
+		
 		return () -> {
 			// TODO: Create a new sorter instance using MultiThreadSorterSkeleton.newInstance(), and a
 			// buffered reader and writer pair based on UTF-8 and a 60 KiB buffer size; note that this
@@ -114,14 +114,39 @@ public final class SortServer implements Runnable, AutoCloseable {
 			// a line separator. Finally, write another line separator to the char sink, and flush the latter
 			// forcing the response data to be sent completely  before reentering the wait for another CSR request.
 			
-			MergeSorter<String> sorter = MultiThreadSorter.newInstance();
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream()))) {
-				
-			} catch (Exception e) {
-				
-			}
 			
+			try (MergeSorter<String> sorter = MultiThreadSorter.newInstance();
+					BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF-8"),
+											BUFFER_SIZE);
+					BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(connection.getOutputStream(), "UTF-8"), BUFFER_SIZE)) {
+				while(true) {
+					try {
+						for(String word = reader.readLine(); reader.ready();
+								word = reader.readLine()) {
+							sorter.write(word);
+						}
+						sorter.write(null);
+						sorter.sort();
+						for(String word = sorter.read(); word != null;
+								word = sorter.read()) {
+							
+							writer.write(word);
+							writer.newLine();
+						}
+						System.out.println("*******************");
+						writer.newLine();
+						writer.flush();
+						
+						//System.out.println(a);
+					} catch (Exception e) {
+						break;
+					}
+				}
+			} catch (final SocketException exception) {
+				return;	// the client side closed the connection
+			} catch (final IOException exception) {
+				throw new UncheckedIOException(exception);
+			}
 		};
 	}
 
